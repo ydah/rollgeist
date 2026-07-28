@@ -158,11 +158,11 @@ the watched operation.
 
 ## Supported versions
 
-| Active Record | Ruby 3.2 | Ruby 3.3 | Ruby 3.4 |
-|---|---:|---:|---:|
-| 7.1 | CI | CI | — |
-| 7.2 | CI | CI | CI |
-| 8.0 | CI | CI | CI |
+| Active Record | Ruby 3.2 | Ruby 3.3 | Ruby 3.4 | Ruby 4.0 |
+|---|---:|---:|---:|---:|
+| 7.1 | CI | CI | — | — |
+| 7.2 | CI | CI | CI | — |
+| 8.0 | CI | CI | CI | CI |
 
 Rails main runs in CI as an allowed-failure early-warning job because
 `rolledback!`, `committed!`, and transaction-record registration are internal
