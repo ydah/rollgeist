@@ -7,7 +7,7 @@ gemspec
 
 gem "appraisal", "~> 2.5"
 gem "benchmark-ips", "~> 2.14"
-gem "globalid", "~> 1.3.0"
+gem "globalid", "~> 1.4.0"
 gem "irb"
 gem "rake", "~> 13.0"
 gem "rspec", "~> 3.0"
