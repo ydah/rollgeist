@@ -65,8 +65,21 @@ module SpecSupport
   end
 
   def build_collectable_ghost
-    record = rolled_back_update(GuardedRecord.create!(name: "before"))
-    WeakRef.new(record)
+    GuardedRecord.columns
+
+    # A terminated thread avoids Ruby 3.2 x86 retaining singleton-method
+    # receivers through a conservative native-stack scan.
+    Thread.new do
+      record = GuardedRecord.new(name: "after")
+      Rollgeist.attach_mark!(
+        record,
+        action: :update,
+        changed_attributes: %w[name],
+        rollback_location: "spec",
+        rolled_back_at: Time.now
+      )
+      WeakRef.new(record)
+    end.value
   end
 end
 
