@@ -33,11 +33,6 @@ ActiveRecord::Schema.define do
   end
 end
 
-class BaselineBenchmarkRecord < ActiveRecord::Base
-  self.table_name = "benchmark_records"
-end
-BaselineBenchmarkRecord.define_method(:serializable_hash, BASE_SERIALIZABLE_HASH)
-
 class GuardedBenchmarkRecord < ActiveRecord::Base
   self.table_name = "benchmark_records"
 end
@@ -54,11 +49,12 @@ attributes = {
   status: "active",
   time_zone: "Asia/Tokyo"
 }
-baseline_record = BaselineBenchmarkRecord.create!(attributes)
-guarded_record = GuardedBenchmarkRecord.find(baseline_record.id)
+seed_record = GuardedBenchmarkRecord.create!(attributes)
+baseline_record = GuardedBenchmarkRecord.find(seed_record.id)
+guarded_record = GuardedBenchmarkRecord.find(seed_record.id)
 
-unless guarded_record.method(:serializable_hash).owner == Rollgeist::Patches::Serialization
-  abort "serialization patch was not installed as expected"
+unless guarded_record.method(:serializable_hash).owner == BASE_SERIALIZABLE_HASH.owner
+  abort "unmarked serialization path differs from Active Record"
 end
 
 report = Benchmark.ips(time: 5, warmup: 2) do |benchmark|

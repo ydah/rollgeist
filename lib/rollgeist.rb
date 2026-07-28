@@ -13,10 +13,9 @@ require_relative "rollgeist/execution_state"
 require_relative "rollgeist/formatter"
 require_relative "rollgeist/mark"
 require_relative "rollgeist/notifier"
+require_relative "rollgeist/record_watchpoints"
 require_relative "rollgeist/report"
-require_relative "rollgeist/patches/global_id"
 require_relative "rollgeist/patches/persistence"
-require_relative "rollgeist/patches/serialization"
 require_relative "rollgeist/patches/transactions"
 
 module Rollgeist
@@ -33,7 +32,6 @@ module Rollgeist
     def configure
       yield(configuration)
       configuration.validate!
-      install_global_id_patch!
       configuration
     end
 
@@ -67,16 +65,7 @@ module Rollgeist
     def install!(active_record_base)
       active_record_base.prepend(Patches::Transactions) unless active_record_base < Patches::Transactions
       active_record_base.prepend(Patches::Persistence) unless active_record_base < Patches::Persistence
-      active_record_base.prepend(Patches::Serialization) unless active_record_base < Patches::Serialization
-      install_global_id_patch!
       ExecutionState.install!
-    end
-
-    def install_global_id_patch!
-      return unless defined?(GlobalID::Identification)
-      return if GlobalID::Identification < Patches::GlobalId
-
-      GlobalID::Identification.prepend(Patches::GlobalId)
     end
 
     def mark_for(record)
@@ -107,7 +96,9 @@ module Rollgeist
     end
 
     def attach_mark!(record, attributes)
-      record.instance_variable_set(MARK_IVAR, Mark.new(**attributes))
+      mark = Mark.new(**attributes)
+      RecordWatchpoints.install!(record)
+      record.instance_variable_set(MARK_IVAR, mark)
       remove_ivar(record, REPORTED_IVAR)
       clear_transaction_write_state!(record)
     rescue StandardError => error
@@ -115,6 +106,7 @@ module Rollgeist
     end
 
     def clear_mark!(record)
+      RecordWatchpoints.uninstall!(record)
       remove_ivar(record, MARK_IVAR)
       remove_ivar(record, REPORTED_IVAR)
     rescue StandardError => error

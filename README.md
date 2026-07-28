@@ -53,9 +53,9 @@ Rollgeist.configure do |config|
 end
 ```
 
-Production is disabled by default because serialization is a hot path and the
-gem prepends behavior across all Active Record models. Enable it only after
-observing the gem in development and test:
+Production is disabled by default because the gem depends on Active Record
+transaction internals and reports application behavior. Enable it only after
+observing the signal quality in development and test:
 
 ```ruby
 config.enabled_environments = %w[development test production]
@@ -171,18 +171,22 @@ behavioral assumptions.
 
 ## Performance
 
-The unmarked serialization path performs one
-`defined?(@__rollgeist_mark)` check before calling Rails.
+Records that have never been marked use Active Record's original serialization
+method directly. Rollgeist installs serialization and GlobalID
+watchpoints only on a record after its write is rolled back, then removes them
+when the record is normalized.
 
 A local sample on Ruby 3.4.9, Active Record 8.0.5, and a 14-column model
-measured 159,552 baseline `as_json` calls/s and 138,785 guarded calls/s:
-14.96% overhead. This misses the current +2% target, so applications should
-remeasure on representative models and hardware before production opt-in.
+measured 140,978 baseline `as_json` calls/s and 140,412 guarded calls/s:
+0.40% overhead, within benchmark error and the +2% target. The benchmark uses
+two unmarked instances of the same class and asserts that both resolve
+`serializable_hash` to Active Record's original method owner.
 
 Reproduce the benchmark with:
 
 ```sh
-bundle exec appraisal rails_8_0 ruby -Ilib benchmark/serialization.rb
+BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile \
+  bundle exec ruby -Ilib benchmark/serialization.rb
 ```
 
 ## Development

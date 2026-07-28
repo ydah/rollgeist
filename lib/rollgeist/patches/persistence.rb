@@ -42,6 +42,9 @@ module Rollgeist
       def restore_mark(mark, reported)
         instance_variable_set(MARK_IVAR, mark)
         instance_variable_set(REPORTED_IVAR, reported) if reported
+        Rollgeist::RecordWatchpoints.install!(self)
+      rescue StandardError => error
+        Rollgeist.tracking_failure("mark restoration", error)
       end
     end
   end
