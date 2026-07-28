@@ -174,9 +174,9 @@ behavioral assumptions.
 The unmarked serialization path performs one
 `defined?(@__rollgeist_mark)` check before calling Rails.
 
-A local sample on Ruby 4.0.0, Active Record 8.0.5, and a 14-column model
-measured 152,531 baseline `as_json` calls/s and 135,523 guarded calls/s:
-12.55% overhead. This misses the current +2% target, so applications should
+A local sample on Ruby 3.4.9, Active Record 8.0.5, and a 14-column model
+measured 159,552 baseline `as_json` calls/s and 138,785 guarded calls/s:
+14.96% overhead. This misses the current +2% target, so applications should
 remeasure on representative models and hardware before production opt-in.
 
 Reproduce the benchmark with:
