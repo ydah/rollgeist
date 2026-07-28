@@ -1,4 +1,4 @@
-# Rollgeist
+# Rollgeist [![Gem Version](https://badge.fury.io/rb/rollgeist.svg)](https://badge.fury.io/rb/rollgeist) [![Test](https://github.com/ydah/rollgeist/actions/workflows/main.yml/badge.svg)](https://github.com/ydah/rollgeist/actions/workflows/main.yml)
 
 Rollgeist detects Active Record objects whose database writes were
 rolled back while their in-memory attributes remained changed.
