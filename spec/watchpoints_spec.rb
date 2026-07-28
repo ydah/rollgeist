@@ -27,13 +27,14 @@ RSpec.describe "ghost watchpoints" do
       .to raise_error(Rollgeist::GhostRecordAccess, /GuardedRecord/)
   end
 
-  it "reports GlobalID conversion and preserves its value" do
-    record = rolled_back_update(GuardedRecord.create!(name: "before"))
-    expected = Rollgeist.suppress { record.to_global_id }
+  it "reports a rolled-back create before GlobalID preserves its missing-id error" do
+    record = nil
+    ActiveRecord::Base.transaction do
+      record = GuardedRecord.create!(name: "created")
+      raise ActiveRecord::Rollback
+    end
 
-    result = record.to_global_id
-
-    expect(result).to eq(expected)
+    expect { record.to_global_id }.to raise_error(URI::GID::MissingModelIdError)
     expect(guard_logger.warnings.one?).to be(true)
     expect(guard_logger.warnings.first).to include("GlobalID")
   end

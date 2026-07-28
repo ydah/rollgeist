@@ -82,11 +82,13 @@ RSpec.describe "rollback marking" do
     observed_mark = :not_called
     GuardedRecord.rollback_observer = lambda do |record|
       observed_mark = Rollgeist.mark_for(record)
+      record.as_json
     end
 
     record = rolled_back_update(GuardedRecord.create!(name: "before"))
 
     expect(observed_mark).to be_nil
+    expect(guard_logger.warnings).to be_empty
     expect(Rollgeist.mark_for(record)).not_to be_nil
   end
 

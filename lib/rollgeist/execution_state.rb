@@ -14,8 +14,8 @@ module Rollgeist
         @installed_executors ||= {}
         return if @installed_executors[executor.object_id]
 
-        executor.to_run { start! }
-        executor.to_complete { complete! }
+        executor.to_run { Rollgeist::ExecutionState.start! }
+        executor.to_complete { Rollgeist::ExecutionState.complete! }
         @installed_executors[executor.object_id] = true
       end
 

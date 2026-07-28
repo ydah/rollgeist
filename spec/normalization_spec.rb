@@ -8,6 +8,8 @@ RSpec.describe "ghost normalization" do
 
     expect(Rollgeist.mark_for(record)).to be_nil
     expect(record.name).to eq("before")
+    record.as_json
+    expect(guard_logger.warnings).to be_empty
   end
 
   it "clears a mark after a successful save" do
@@ -17,6 +19,8 @@ RSpec.describe "ghost normalization" do
 
     expect(Rollgeist.mark_for(record)).to be_nil
     expect(record.reload.name).to eq("after")
+    record.as_json
+    expect(guard_logger.warnings).to be_empty
   end
 
   it "clears a mark after a successful destroy" do

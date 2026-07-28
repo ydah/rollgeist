@@ -71,10 +71,7 @@ RSpec.describe "reporting controls" do
       records.each { |record| record.update!(name: "after") }
       raise ActiveRecord::Rollback
     end
-    Rollgeist::ExecutionState.start!
-
-    records.each(&:as_json)
-    Rollgeist::ExecutionState.complete!
+    ActiveSupport::Executor.wrap { records.each(&:as_json) }
 
     reports = guard_logger.warnings.grep(/Rollgeist::GhostRecordAccess/)
     summaries = guard_logger.warnings.grep(/\+95 more suppressed/)
@@ -88,12 +85,8 @@ RSpec.describe "reporting controls" do
       rolled_back_update(GuardedRecord.create!(name: "before"))
     end
 
-    Rollgeist::ExecutionState.start!
-    records.first.as_json
-    Rollgeist::ExecutionState.complete!
-    Rollgeist::ExecutionState.start!
-    records.last.as_json
-    Rollgeist::ExecutionState.complete!
+    ActiveSupport::Executor.wrap { records.first.as_json }
+    ActiveSupport::Executor.wrap { records.last.as_json }
 
     expect(guard_logger.warnings.grep(/GhostRecordAccess/).size).to eq(2)
   end
